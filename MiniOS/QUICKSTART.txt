@@ -1,0 +1,310 @@
+════════════════════════════════════════════════════════════════════════════
+                         QUICK START GUIDE
+════════════════════════════════════════════════════════════════════════════
+
+📂 PROJECT DIRECTORY STRUCTURE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+MiniOS/
+├── Main.java                                    (10 files total)
+├── README.md                                    (This documentation)
+├── QUICKSTART.txt                               (You are here)
+├── log.txt                                      (Generated after running)
+│
+└── os/
+    ├── process/
+    │   └── Process.java
+    │
+    ├── thread/
+    │   └── ThreadTask.java
+    │
+    ├── task/
+    │   ├── Task.java
+    │   ├── PrintTask.java
+    │   └── CalculationTask.java
+    │
+    ├── scheduler/
+    │   ├── Scheduler.java
+    │   └── SimpleScheduler.java
+    │
+    ├── utils/
+    │   └── Logger.java
+    │
+    └── exception/
+        └── InvalidProcessException.java
+
+
+⚙️  COMPILATION & EXECUTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STEP 1: Open Terminal/Command Prompt
+────────────────────────────────────
+cd /path/to/MiniOS
+
+
+STEP 2: Compile (One command!)
+──────────────────────────────
+javac -d . Main.java
+
+✓ This compiles all Java files
+✓ Creates proper package structure with .class files
+✓ No errors should appear
+
+
+STEP 3: Run the Program
+──────────────────────
+java os.Main
+
+✓ Shows beautiful output with 3 processes
+✓ Each process has multiple concurrent threads
+✓ Shows real-time thread execution
+✓ Demonstrates concurrent multithreading
+✓ Creates log.txt automatically
+
+
+STEP 4: View the Generated Log
+──────────────────────────────
+cat log.txt          (Linux/macOS)
+type log.txt         (Windows)
+
+✓ Shows timestamped log entries
+✓ Documents all process creation and execution
+
+
+🎯 WHAT EACH FILE DOES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Main.java
+├─ Entry point of the program
+├─ Creates 3 processes with 8 total threads
+├─ Demonstrates scheduler usage
+├─ Shows exception handling
+└─ Uses all OOP concepts
+
+Task.java (Abstract)
+├─ Base class for all tasks
+├─ Defines execute() abstract method
+└─ Properties: taskName, taskId, creationTime
+
+PrintTask.java
+├─ Implements Task
+├─ Prints messages repeatedly
+└─ Simulates work with sleep()
+
+CalculationTask.java
+├─ Implements Task
+├─ Performs mathematical calculations
+├─ Can do: +, -, *, / operations
+└─ Handles division by zero
+
+ThreadTask.java
+├─ Extends Thread
+├─ Executes a Task
+├─ Tracks execution time
+└─ Reports completion status
+
+Process.java
+├─ Contains multiple threads
+├─ Manages process lifecycle
+├─ Collections: ArrayList<ThreadTask>
+└─ States: CREATED → RUNNING → COMPLETED
+
+Scheduler.java (Interface)
+├─ Defines scheduling contract
+└─ Methods: schedule(), getSchedulerName()
+
+SimpleScheduler.java
+├─ Implements Scheduler
+├─ Manages multiple processes
+├─ Executes processes sequentially
+└─ Provides execution statistics
+
+Logger.java (Singleton)
+├─ File-based logging
+├─ Writes to log.txt
+├─ Thread-safe operations
+└─ Timestamp support
+
+InvalidProcessException.java
+├─ Custom exception
+├─ Thrown for invalid process operations
+└─ Proper error handling demo
+
+
+📊 SAMPLE OUTPUT (First 30 lines)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║   Mini OS Process & Thread Management Simulator                            ║
+║           Demonstrating OOP Concepts                                       ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+>>> Creating Process 1: Background Tasks <<<
+
+Thread added to process 'Background Tasks': Thread-1
+Thread added to process 'Background Tasks': Thread-2
+[SimpleScheduler] Scheduled process: Background Tasks (ID: 1)
+
+>>> Creating Process 2: Calculations <<<
+
+Thread added to process 'Calculations': Thread-3
+Thread added to process 'Calculations': Thread-4
+Thread added to process 'Calculations': Thread-5
+[SimpleScheduler] Scheduled process: Calculations (ID: 2)
+
+>>> Creating Process 3: Mixed Tasks <<<
+
+Thread added to process 'Mixed Tasks': Thread-6
+Thread added to process 'Mixed Tasks': Thread-7
+Thread added to process 'Mixed Tasks': Thread-8
+[SimpleScheduler] Scheduled process: Mixed Tasks (ID: 3)
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║              Scheduler Information                                         ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+Scheduler Name: Primary OS Scheduler
+Total Scheduled Processes: 3
+  - Process{processId=1, processName='Background Tasks', state=CREATED, ...
+  - Process{processId=2, processName='Calculations', state=CREATED, ...
+  - Process{processId=3, processName='Mixed Tasks', state=CREATED, ...
+
+[Output continues with concurrent thread execution...]
+[Total output: ~100+ lines showing concurrent execution]
+
+
+🔑 KEY OOP CONCEPTS DEMONSTRATED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✓ INHERITANCE
+  ThreadTask extends Thread
+  PrintTask extends Task
+  CalculationTask extends Task
+
+✓ POLYMORPHISM
+  Overriding execute() in PrintTask and CalculationTask
+  Different behavior, same interface
+
+✓ ENCAPSULATION
+  Private variables (processId, taskName, etc.)
+  Public getters and setters
+
+✓ ABSTRACTION
+  Abstract Task class
+  Scheduler interface
+
+✓ INTERFACES
+  Scheduler interface
+  Implemented by SimpleScheduler
+
+✓ PACKAGES
+  os.process, os.thread, os.task
+  os.scheduler, os.utils, os.exception
+
+✓ COLLECTIONS
+  ArrayList<ThreadTask> in Process
+  ArrayList<Process> in SimpleScheduler
+
+✓ MULTITHREADING
+  ThreadTask extends Thread
+  Multiple threads running concurrently
+  Proper synchronization with join()
+
+✓ EXCEPTION HANDLING
+  Custom InvalidProcessException
+  Try-catch blocks throughout
+  Multiple exception types handled
+
+
+💾 FILE STRUCTURE AFTER COMPILATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The compilation (javac -d . Main.java) will create:
+
+MiniOS/
+├── Main.class
+├── Main.java
+├── os/
+│   ├── Main.class
+│   ├── process/Process.class
+│   ├── thread/ThreadTask.class
+│   ├── task/Task.class
+│   ├── task/PrintTask.class
+│   ├── task/CalculationTask.class
+│   ├── scheduler/Scheduler.class
+│   ├── scheduler/SimpleScheduler.class
+│   ├── utils/Logger.class
+│   └── exception/InvalidProcessException.class
+└── log.txt (created when you run the program)
+
+
+⚠️  TROUBLESHOOTING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ERROR: "Could not find or load main class Main"
+SOLUTION: Run with: java os.Main (NOT just java Main)
+
+ERROR: "FileNotFoundException"
+SOLUTION: Ensure you can write to the directory (log.txt is created here)
+
+ERROR: Compilation errors about packages
+SOLUTION: Make sure to run "javac -d . Main.java" in the MiniOS directory
+
+ERROR: Only 1 thread showing output
+SOLUTION: This is not an error! Threads are sleeping.
+         The output shows concurrent execution correctly.
+
+
+✨ WHAT TO EXPECT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+When you run the program:
+
+1. Beautiful ASCII banner appears
+2. Process creation messages
+3. Scheduler information
+4. THREE PROCESSES execute with 8 total threads:
+   - Process 1: 2 print tasks
+   - Process 2: 3 calculation tasks
+   - Process 3: Mix of print and calculation
+
+5. Concurrent execution shows:
+   - Multiple threads running "at the same time"
+   - Thread names (Thread-1, Thread-2, etc.)
+   - Task names and outputs
+   - Execution times for each thread
+
+6. Statistics for each process:
+   - Total threads
+   - Completed threads
+   - Total execution time
+
+7. Final report:
+   - Overall execution time
+   - Total processes completed
+   - Total threads executed
+
+8. Exception handling demonstration
+
+9. Completion message and log file reference
+
+
+📝 SAMPLE COMMAND SEQUENCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+$ cd MiniOS
+$ javac -d . Main.java
+$ java os.Main
+
+[Beautiful output appears on screen]
+
+$ cat log.txt
+
+[Log file contents appear]
+
+All done! Check README.md for detailed documentation.
+
+
+================================================================================
+                    Ready to run! Good luck! 🚀
+================================================================================

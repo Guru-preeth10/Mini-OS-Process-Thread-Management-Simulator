@@ -1,0 +1,52 @@
+[2026-04-07 23:24:42.072] ========== Logger Initialized ==========
+[2026-04-07 23:24:42.087] INFO: Mini OS Simulator Started
+[2026-04-07 23:24:42.088] INFO: Scheduler created: Primary OS Scheduler
+[2026-04-07 23:24:42.089] INFO: Process 1 created: Background Tasks
+[2026-04-07 23:24:42.102] INFO: Process 2 created: Calculations
+[2026-04-07 23:24:42.102] INFO: Process 3 created: Mixed Tasks
+[2026-04-07 23:24:42.104] INFO: Scheduler info: SimpleScheduler{schedulerName='Primary OS Scheduler', scheduledProcessCount=3}
+[2026-04-07 23:24:45.252] SUCCESS: All processes executed successfully
+[2026-04-07 23:24:45.253] INFO: Overall execution time: 3134ms
+[2026-04-07 23:24:45.256] INFO: Exception caught: No threads available to start in process: Empty Process
+[2026-04-07 23:24:45.257] INFO: Mini OS Simulator Completed
+[2026-04-07 23:24:45.257] ========== Logger Closed ==========
+
+[2026-04-07 23:33:06.933] ========== Logger Initialized ==========
+[2026-04-07 23:33:06.964] INFO: Mini OS Simulator Started
+[2026-04-07 23:33:06.967] INFO: Scheduler created: Primary OS Scheduler
+[2026-04-07 23:33:06.968] INFO: Process 1 created: Background Tasks
+[2026-04-07 23:33:06.991] INFO: Process 2 created: Calculations
+[2026-04-07 23:33:06.993] INFO: Process 3 created: Mixed Tasks
+[2026-04-07 23:33:06.996] INFO: Scheduler info: SimpleScheduler{schedulerName='Primary OS Scheduler', scheduledProcessCount=3}
+[2026-04-07 23:33:10.197] SUCCESS: All processes executed successfully
+[2026-04-07 23:33:10.198] INFO: Overall execution time: 3169ms
+[2026-04-07 23:33:10.199] INFO: Exception caught: No threads available to start in process: Empty Process
+[2026-04-07 23:33:10.199] INFO: Mini OS Simulator Completed
+[2026-04-07 23:33:10.199] ========== Logger Closed ==========
+
+[2026-04-08 12:52:39.132] ========== Logger Initialized ==========
+[2026-04-08 12:52:39.144] INFO: Mini OS Simulator Started
+[2026-04-08 12:52:39.146] INFO: Scheduler created: Primary OS Scheduler
+[2026-04-08 12:52:39.147] INFO: Process 1 created: Background Tasks
+[2026-04-08 12:52:39.156] INFO: Process 2 created: Calculations
+[2026-04-08 12:52:39.157] INFO: Process 3 created: Mixed Tasks
+[2026-04-08 12:52:39.161] INFO: Scheduler info: SimpleScheduler{schedulerName='Primary OS Scheduler', scheduledProcessCount=3}
+[2026-04-08 12:52:42.329] SUCCESS: All processes executed successfully
+[2026-04-08 12:52:42.329] INFO: Overall execution time: 3141ms
+[2026-04-08 12:52:42.331] INFO: Exception caught: No threads available to start in process: Empty Process
+[2026-04-08 12:52:42.331] INFO: Mini OS Simulator Completed
+[2026-04-08 12:52:42.332] ========== Logger Closed ==========
+
+[2026-04-08 12:57:16.179] ========== Logger Initialized ==========
+[2026-04-08 12:57:16.190] INFO: Mini OS Simulator Started
+[2026-04-08 12:57:16.192] INFO: Scheduler created: Primary OS Scheduler
+[2026-04-08 12:57:16.194] INFO: Process 1 created: Background Tasks
+[2026-04-08 12:57:16.201] INFO: Process 2 created: Calculations
+[2026-04-08 12:57:16.202] INFO: Process 3 created: Mixed Tasks
+[2026-04-08 12:57:16.204] INFO: Scheduler info: SimpleScheduler{schedulerName='Primary OS Scheduler', scheduledProcessCount=3}
+[2026-04-08 12:57:19.352] SUCCESS: All processes executed successfully
+[2026-04-08 12:57:19.353] INFO: Overall execution time: 3129ms
+[2026-04-08 12:57:19.359] INFO: Exception caught: No threads available to start in process: Empty Process
+[2026-04-08 12:57:19.360] INFO: Mini OS Simulator Completed
+[2026-04-08 12:57:19.361] ========== Logger Closed ==========
+
