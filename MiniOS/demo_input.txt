@@ -1,0 +1,33 @@
+1
+My First Process
+2
+1
+Hello from first thread
+2
+1
+1
+Second Process
+2
+2
+15
+25
++
+3
+2
+2
+Print Log Status
+3
+3
+1
+My First Process
+3
+2
+100
+50
+*
+3
+3
+1
+Second Process
+4
+5
