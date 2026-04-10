@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini OS Control Center - Process & Thread Management System</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Header Navigation -->
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <span class="logo-icon">⚙️</span>
+                <h1>Mini OS Control Center</h1>
+            </div>
+            <nav class="nav-tabs">
+                <button class="nav-tab active" data-tab="dashboard">
+                    <span class="icon">📊</span> Dashboard
+                </button>
+                <button class="nav-tab" data-tab="processes">
+                    <span class="icon">⚡</span> Processes
+                </button>
+                <button class="nav-tab" data-tab="scheduler">
+                    <span class="icon">📅</span> Scheduler
+                </button>
+            </nav>
+            <div class="server-status">
+                <span class="status-dot"></span>
+                <span class="status-text">System Online</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- ===== DASHBOARD TAB ===== -->
+        <section id="dashboard" class="tab-content active">
+            <!-- Statistics Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon processes">📦</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="stat-processes">0</div>
+                        <div class="stat-label">Total Processes</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon threads">🧵</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="stat-threads">0</div>
+                        <div class="stat-label">Active Threads</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon completed">✅</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="stat-completed">0</div>
+                        <div class="stat-label">Completed Tasks</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon errors">⚠️</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="stat-errors">0</div>
+                        <div class="stat-label">System Errors</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Feed & System Info Grid -->
+            <div class="dashboard-grid">
+                <!-- Recent Activity -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2>📋 Recent Activity</h2>
+                        <button class="btn-icon" id="clear-log">Clear</button>
+                    </div>
+                    <div class="activity-feed" id="activity-feed">
+                        <div class="activity-item info">
+                            <span class="time">00:00:00</span>
+                            <span class="message">System initialized successfully</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Resources -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2>🔧 System Resources</h2>
+                    </div>
+                    <div class="resource-info">
+                        <div class="resource-item">
+                            <label>Memory Usage</label>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 35%"></div>
+                            </div>
+                            <span class="resource-value">35%</span>
+                        </div>
+                        <div class="resource-item">
+                            <label>CPU Load</label>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 28%"></div>
+                            </div>
+                            <span class="resource-value">28%</span>
+                        </div>
+                        <div class="resource-item">
+                            <label>Thread Pool</label>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 12%"></div>
+                            </div>
+                            <span class="resource-value">12/100</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== PROCESSES TAB ===== -->
+        <section id="processes" class="tab-content">
+            <div class="section-header">
+                <h2>Process Management</h2>
+                <button class="btn btn-primary" id="create-process-btn">
+                    <span class="icon">➕</span> Create New Process
+                </button>
+            </div>
+
+            <!-- Process List -->
+            <div class="processes-container" id="processes-container">
+                <div class="empty-state">
+                    <div class="empty-icon">📭</div>
+                    <p>No processes created yet</p>
+                    <small>Click "Create New Process" to get started</small>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== SCHEDULER TAB ===== -->
+        <section id="scheduler" class="tab-content">
+            <div class="section-header">
+                <h2>Scheduler & Timeline</h2>
+            </div>
+
+            <!-- Scheduler Stats -->
+            <div class="scheduler-stats">
+                <div class="scheduler-stat">
+                    <span class="label">Queued</span>
+                    <span class="value" id="scheduler-queued">0</span>
+                </div>
+                <div class="scheduler-stat">
+                    <span class="label">Running</span>
+                    <span class="value" id="scheduler-running">0</span>
+                </div>
+                <div class="scheduler-stat">
+                    <span class="label">Completed</span>
+                    <span class="value" id="scheduler-completed">0</span>
+                </div>
+            </div>
+
+            <!-- Timeline -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>Execution Timeline</h2>
+                </div>
+                <div class="timeline" id="timeline">
+                    <div class="empty-state">
+                        <p>No execution history yet</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ===== MODALS ===== -->
+
+    <!-- Create Process Modal -->
+    <div class="modal" id="create-process-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create New Process</h2>
+                <button class="modal-close" data-modal="create-process-modal">&times;</button>
+            </div>
+            <form id="create-process-form" class="modal-form">
+                <div class="form-group">
+                    <label for="process-name">Process Name</label>
+                    <input
+                        type="text"
+                        id="process-name"
+                        placeholder="e.g., Background Tasks, Data Processing..."
+                        required
+                    >
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" data-modal="create-process-modal">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="icon">✓</span> Create Process
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Thread Modal -->
+    <div class="modal" id="add-thread-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Thread to Process</h2>
+                <button class="modal-close" data-modal="add-thread-modal">&times;</button>
+            </div>
+            <form id="add-thread-form" class="modal-form">
+                <input type="hidden" id="thread-process-id">
+
+                <div class="form-group">
+                    <label for="task-type">Task Type</label>
+                    <select id="task-type" required>
+                        <option value="">Select a task type...</option>
+                        <option value="print">Print Task (Print messages)</option>
+                        <option value="calculation">Calculation Task (Math operations)</option>
+                    </select>
+                </div>
+
+                <!-- Print Task Fields -->
+                <div id="print-fields" class="task-fields hidden">
+                    <div class="form-group">
+                        <label for="print-message">Message</label>
+                        <input
+                            type="text"
+                            id="print-message"
+                            placeholder="Enter message to print..."
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="print-iterations">Iterations</label>
+                        <input
+                            type="number"
+                            id="print-iterations"
+                            min="1"
+                            max="10"
+                            value="1"
+                        >
+                    </div>
+                </div>
+
+                <!-- Calculation Task Fields -->
+                <div id="calc-fields" class="task-fields hidden">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="calc-num1">Number 1</label>
+                            <input
+                                type="number"
+                                id="calc-num1"
+                                placeholder="e.g., 100"
+                            >
+                        </div>
+                        <div class="form-group">
+                            <label for="calc-operator">Operator</label>
+                            <select id="calc-operator">
+                                <option value="+">+ (Addition)</option>
+                                <option value="-">- (Subtraction)</option>
+                                <option value="*">* (Multiplication)</option>
+                                <option value="/">/ (Division)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="calc-num2">Number 2</label>
+                            <input
+                                type="number"
+                                id="calc-num2"
+                                placeholder="e.g., 50"
+                            >
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" data-modal="add-thread-modal">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="icon">✓</span> Add Thread
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Execution Output Modal -->
+    <div class="modal" id="execution-modal">
+        <div class="modal-content execution-modal">
+            <div class="modal-header">
+                <h2>Process Execution</h2>
+                <button class="modal-close" data-modal="execution-modal">&times;</button>
+            </div>
+            <div class="execution-output" id="execution-output">
+                <div class="output-placeholder">Ready to execute...</div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-modal="execution-modal">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Script -->
+    <script src="js/app.js"></script>
+</body>
+</html>
