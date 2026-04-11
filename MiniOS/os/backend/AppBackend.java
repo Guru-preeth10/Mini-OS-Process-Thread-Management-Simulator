@@ -35,27 +35,28 @@ public class AppBackend {
         return instance;
     }
 
-    public synchronized Process createProcess(String name) {
-        Process p = new Process(processIdCounter++, name);
+    public synchronized Process createProcess(String name, String priorityStr) {
+        Process.Priority pr = parsePriority(priorityStr);
+        Process p = new Process(processIdCounter++, name, pr);
         processRepository.add(p);
         scheduler.schedule(p);
         return p;
     }
 
-    public synchronized boolean addPrintThread(int processId, String message, int iterations) throws InvalidProcessException {
+    public synchronized boolean addPrintThread(int processId, String message, int iterations, String priorityStr) throws InvalidProcessException {
         Process p = findProcess(processId);
         if (p == null) return false;
         PrintTask task = new PrintTask("PrintTask-" + taskIdCounter, taskIdCounter++, message, iterations);
-        ThreadTask t = new ThreadTask(threadIdCounter++, task);
+        ThreadTask t = new ThreadTask(threadIdCounter++, task, parsePriority(priorityStr));
         p.addThreadTask(t);
         return true;
     }
 
-    public synchronized boolean addCalculationThread(int processId, int num1, int num2, String op) throws InvalidProcessException {
+    public synchronized boolean addCalculationThread(int processId, int num1, int num2, String op, String priorityStr) throws InvalidProcessException {
         Process p = findProcess(processId);
         if (p == null) return false;
         CalculationTask task = new CalculationTask("CalcTask-" + taskIdCounter, taskIdCounter++, num1, num2, op);
-        ThreadTask t = new ThreadTask(threadIdCounter++, task);
+        ThreadTask t = new ThreadTask(threadIdCounter++, task, parsePriority(priorityStr));
         p.addThreadTask(t);
         return true;
     }
@@ -77,6 +78,19 @@ public class AppBackend {
 
     public synchronized List<Process> getProcesses() {
         return new ArrayList<>(processRepository);
+    }
+
+    public synchronized void runScheduler() {
+        scheduler.executeAllProcesses();
+    }
+
+    private Process.Priority parsePriority(String s) {
+        if (s == null) return Process.Priority.MEDIUM;
+        try {
+            return Process.Priority.valueOf(s.trim().toUpperCase());
+        } catch (Exception e) {
+            return Process.Priority.MEDIUM;
+        }
     }
 
     public synchronized SimpleScheduler getScheduler() {

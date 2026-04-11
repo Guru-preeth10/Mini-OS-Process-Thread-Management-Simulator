@@ -4,6 +4,8 @@ import os.process.Process;
 import os.exception.InvalidProcessException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Comparator;
 
 /**
  * SimpleScheduler - Implements the Scheduler interface
@@ -16,7 +18,7 @@ import java.util.List;
 public class SimpleScheduler implements Scheduler {
 
     private String schedulerName;
-    private List<Process> scheduledProcesses;
+    private PriorityQueue<Process> scheduledProcesses;
     private int processExecutionOrder; // Counter for process execution
 
     /**
@@ -25,7 +27,8 @@ public class SimpleScheduler implements Scheduler {
      */
     public SimpleScheduler(String schedulerName) {
         this.schedulerName = schedulerName;
-        this.scheduledProcesses = new ArrayList<>();
+        // PriorityQueue: processes with lower ordinal (HIGH) come first
+        this.scheduledProcesses = new PriorityQueue<>(Comparator.comparingInt(p -> p.getPriority().ordinal()));
         this.processExecutionOrder = 0;
     }
 
@@ -40,7 +43,6 @@ public class SimpleScheduler implements Scheduler {
             System.err.println("Cannot schedule null process");
             return;
         }
-
         scheduledProcesses.add(process);
         System.out.println("[SimpleScheduler] Scheduled process: " + process.getProcessName() +
                 " (ID: " + process.getProcessId() + ")");
@@ -55,12 +57,13 @@ public class SimpleScheduler implements Scheduler {
             return;
         }
 
-        System.out.println("\n[SimpleScheduler] Executing " + scheduledProcesses.size() + " scheduled processes...\n");
+        System.out.println("\n[SimpleScheduler] Executing " + scheduledProcesses.size() + " scheduled processes (by priority)...\n");
 
-        for (Process process : scheduledProcesses) {
+        while (!scheduledProcesses.isEmpty()) {
+            Process process = scheduledProcesses.poll();
             try {
                 processExecutionOrder++;
-                System.out.println("\n[SimpleScheduler] Executing process #" + processExecutionOrder);
+                System.out.println("\n[SimpleScheduler] Executing process #" + processExecutionOrder + " -> " + process.getProcessName() + " [" + process.getPriority() + "]");
 
                 process.startProcess();
                 process.waitForCompletion();
@@ -97,7 +100,10 @@ public class SimpleScheduler implements Scheduler {
      * @return List of scheduled processes
      */
     public List<Process> getScheduledProcesses() {
-        return new ArrayList<>(scheduledProcesses);
+        // Return processes in priority order without modifying the queue
+        List<Process> list = new ArrayList<>(scheduledProcesses);
+        list.sort(Comparator.comparingInt(p -> p.getPriority().ordinal()));
+        return list;
     }
 
     /**

@@ -21,6 +21,9 @@ public class Process {
     private ProcessState state;
     private long startTime;
     private long endTime;
+    // Priority for the process (HIGH -> MEDIUM -> LOW)
+    public static enum Priority { HIGH, MEDIUM, LOW }
+    private Priority priority = Priority.MEDIUM;
 
     /**
      * Enum for Process States
@@ -40,6 +43,12 @@ public class Process {
         this.creationTime = System.currentTimeMillis();
         this.threads = new ArrayList<>(); // Using ArrayList from Collections
         this.state = ProcessState.CREATED;
+    }
+
+    // New constructor that accepts priority (keeps backward compatibility)
+    public Process(int processId, String processName, Priority priority) {
+        this(processId, processName);
+        if (priority != null) this.priority = priority;
     }
 
     /**
@@ -71,6 +80,12 @@ public class Process {
         System.out.println("========================================\n");
 
         // Start all threads (concurrent execution)
+        // To respect thread priority, sort threads so higher priority threads start first
+        threads.sort((a, b) -> {
+            int pa = a.getThreadPriority() == null ? Priority.MEDIUM.ordinal() : a.getThreadPriority().ordinal();
+            int pb = b.getThreadPriority() == null ? Priority.MEDIUM.ordinal() : b.getThreadPriority().ordinal();
+            return Integer.compare(pa, pb);
+        });
         for (ThreadTask thread : threads) {
             thread.start();
         }
@@ -132,6 +147,10 @@ public class Process {
         }
         return count;
     }
+
+    public Priority getPriority() { return priority; }
+
+    public void setPriority(Priority priority) { if (priority != null) this.priority = priority; }
 
     /**
      * Terminate the process

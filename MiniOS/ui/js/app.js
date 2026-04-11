@@ -12,6 +12,7 @@ const ENDPOINTS = {
     CREATE_PROCESS: '/createProcess',
     ADD_THREAD: '/addThread',
     RUN_PROCESS: '/runProcess',
+    RUN_SCHEDULER: '/runScheduler',
     GET_PROCESSES: '/getProcesses',
     GET_SCHEDULER_INFO: '/getSchedulerInfo'
 };
@@ -59,6 +60,10 @@ function initializeEventListeners() {
 
     // Create Process Form
     document.getElementById('create-process-form').addEventListener('submit', handleCreateProcess);
+
+    // Run Scheduler Button
+    const runBtn = document.getElementById('run-scheduler-btn');
+    if (runBtn) runBtn.addEventListener('click', runScheduler);
 
     // Add Thread Form
     document.getElementById('add-thread-form').addEventListener('submit', handleAddThread);
@@ -156,6 +161,7 @@ async function handleCreateProcess(e) {
     e.preventDefault();
 
     const processName = document.getElementById('process-name').value.trim();
+    const priority = document.getElementById('process-priority') ? document.getElementById('process-priority').value : 'MEDIUM';
 
     if (!processName) {
         showToast('Process name cannot be empty', 'error');
@@ -167,7 +173,7 @@ async function handleCreateProcess(e) {
         const response = await fetch(`${API_BASE}${ENDPOINTS.CREATE_PROCESS}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: processName })
+            body: JSON.stringify({ name: processName, priority })
         });
 
         if (!response.ok) {
@@ -179,6 +185,7 @@ async function handleCreateProcess(e) {
             id: data.id || state.processes.length + 1,
             name: processName,
             status: 'CREATED',
+            priority: priority || 'MEDIUM',
             threads: [],
             createdAt: new Date()
         };
@@ -219,9 +226,12 @@ function renderProcesses() {
                     <div class="process-name">⚡ ${process.name}</div>
                     <div class="process-id">PID: ${process.id}</div>
                 </div>
-                <span class="status-badge ${process.status.toLowerCase()}">
-                    ${process.status}
-                </span>
+                <div style="display:flex;gap:8px;align-items:center">
+                    <span class="priority-badge priority-${(process.priority||'MEDIUM').toLowerCase()}">${(process.priority||'MEDIUM')}</span>
+                    <span class="status-badge ${process.status.toLowerCase()}">
+                        ${process.status}
+                    </span>
+                </div>
             </div>
 
             <div class="process-stats">
@@ -293,6 +303,7 @@ async function handleAddThread(e) {
 
     try {
         let threadData;
+        const threadPriority = document.getElementById('thread-priority') ? document.getElementById('thread-priority').value : 'MEDIUM';
 
         if (taskType === 'print') {
             const message = document.getElementById('print-message').value.trim();
@@ -307,7 +318,8 @@ async function handleAddThread(e) {
                 processId,
                 taskType: 'PrintTask',
                 message,
-                iterations
+                iterations,
+                priority: threadPriority
             };
         } else if (taskType === 'calculation') {
             const num1 = parseInt(document.getElementById('calc-num1').value);
@@ -325,6 +337,7 @@ async function handleAddThread(e) {
                 num1,
                 num2,
                 operator
+                ,priority: threadPriority
             };
         }
 
@@ -344,7 +357,8 @@ async function handleAddThread(e) {
             process.threads.push({
                 id: process.threads.length + 1,
                 type: taskType,
-                data: threadData
+                data: threadData,
+                priority: threadData.priority || 'MEDIUM'
             });
             state.stats.activeThreads++;
         }
@@ -411,6 +425,59 @@ async function runProcess(processId) {
         addActivityLog(`Error running process: ${error.message}`, 'error');
         state.stats.errors++;
         updateStats();
+    }
+}
+
+async function runScheduler() {
+    // Start scheduler on backend
+    try {
+        const resp = await fetch(`${API_BASE}${ENDPOINTS.RUN_SCHEDULER}`, { method: 'POST' });
+        if (!resp.ok) throw new Error('Failed to start scheduler');
+
+        // Client-side UI animation to show execution order by priority
+        // Sort processes by priority (HIGH -> MEDIUM -> LOW)
+        const order = [...state.processes].sort((a, b) => {
+            const pa = priorityValue(a.priority || 'MEDIUM');
+            const pb = priorityValue(b.priority || 'MEDIUM');
+            if (pa !== pb) return pa - pb; // lower value = higher priority
+            return (a.createdAt && b.createdAt) ? new Date(a.createdAt) - new Date(b.createdAt) : a.id - b.id;
+        });
+
+        addActivityLog('Scheduler started', 'info');
+
+        for (let i = 0; i < order.length; i++) {
+            const p = order[i];
+            if (p.status === 'COMPLETED') continue;
+            p.status = 'RUNNING';
+            renderProcesses();
+            updateStats();
+            addActivityLog(`Running: ${p.name} (Priority: ${p.priority || 'MEDIUM'})`, 'info');
+
+            // simulate runtime based on number of threads
+            const runtime = Math.max(1000, (p.threads.length || 1) * 800);
+            // wait
+            await new Promise(r => setTimeout(r, runtime));
+
+            p.status = 'COMPLETED';
+            state.stats.completedTasks++;
+            renderProcesses();
+            updateStats();
+            addActivityLog(`Completed: ${p.name}`, 'success');
+        }
+
+        addActivityLog('Scheduler finished', 'success');
+    } catch (err) {
+        console.error(err);
+        showToast('Failed to run scheduler', 'error');
+    }
+}
+
+function priorityValue(p) {
+    switch ((p||'MEDIUM').toUpperCase()) {
+        case 'HIGH': return 0;
+        case 'MEDIUM': return 1;
+        case 'LOW': return 2;
+        default: return 1;
     }
 }
 
@@ -518,11 +585,19 @@ function renderTimeline() {
         return;
     }
 
-    timeline.innerHTML = state.processes.map((process, idx) => `
+    // Show expected execution order: sort by priority (HIGH -> MEDIUM -> LOW)
+    const ordered = [...state.processes].sort((a, b) => {
+        const pa = priorityValue(a.priority || 'MEDIUM');
+        const pb = priorityValue(b.priority || 'MEDIUM');
+        if (pa !== pb) return pa - pb;
+        return (a.createdAt && b.createdAt) ? new Date(a.createdAt) - new Date(b.createdAt) : a.id - b.id;
+    });
+
+    timeline.innerHTML = ordered.map((process, idx) => `
         <div class="timeline-item">
             <div class="timeline-dot">${idx + 1}</div>
             <div class="timeline-content">
-                <div class="timeline-title">${process.name}</div>
+                <div class="timeline-title">${process.name} <span class="priority-badge priority-${(process.priority||'MEDIUM').toLowerCase()}">${(process.priority||'MEDIUM')}</span></div>
                 <div class="timeline-subtitle">
                     <span class="status-badge ${process.status.toLowerCase()}">${process.status}</span>
                 </div>
@@ -540,6 +615,24 @@ function renderTimeline() {
 
 function loadInitialData() {
     updateStats();
+    // fetch processes from backend if available
+    fetch(`${API_BASE}${ENDPOINTS.GET_PROCESSES}`)
+        .then(r => r.ok ? r.json() : Promise.reject(r))
+        .then(list => {
+            state.processes = list.map(p => ({
+                id: p.id,
+                name: p.name,
+                status: (p.status || 'CREATED'),
+                priority: (p.priority || p.priority) || 'MEDIUM',
+                threads: [],
+                createdAt: new Date()
+            }));
+            state.stats.totalProcesses = state.processes.length;
+            renderProcesses();
+            updateStats();
+        }).catch(() => {
+            // ignore if backend not running
+        });
 }
 
 function updateStats() {

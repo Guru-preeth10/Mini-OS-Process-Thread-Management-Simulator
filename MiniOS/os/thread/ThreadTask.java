@@ -2,6 +2,7 @@ package os.thread;
 
 import os.task.Task;
 
+
 /**
  * ThreadTask - Represents a thread that executes a Task
  * Demonstrates inheritance from Thread class
@@ -14,6 +15,7 @@ public class ThreadTask extends Thread {
     private long startTime;
     private long endTime;
     private boolean isCompleted;
+    private os.process.Process.Priority priority = os.process.Process.Priority.MEDIUM;
 
     /**
      * Constructor for ThreadTask
@@ -25,6 +27,11 @@ public class ThreadTask extends Thread {
         this.task = task;
         this.isCompleted = false;
         this.setName("Thread-" + threadId);
+    }
+
+    public ThreadTask(int threadId, Task task, os.process.Process.Priority priority) {
+        this(threadId, task);
+        if (priority != null) this.priority = priority;
     }
 
     /**
@@ -79,6 +86,14 @@ public class ThreadTask extends Thread {
 
     public boolean isCompleted() {
         return isCompleted;
+    }
+
+    public os.process.Process.Priority getThreadPriority() {
+        return priority;
+    }
+
+    public void setThreadPriority(os.process.Process.Priority priority) {
+        if (priority != null) this.priority = priority;
     }
 
     public long getExecutionTime() {

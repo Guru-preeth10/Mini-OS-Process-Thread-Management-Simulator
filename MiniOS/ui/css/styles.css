@@ -500,6 +500,28 @@ body {
     color: var(--success);
 }
 
+/* Priority badges */
+.priority-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+.priority-high {
+    background: rgba(248, 81, 73, 0.12);
+    color: var(--error);
+}
+.priority-medium {
+    background: rgba(210, 153, 34, 0.12);
+    color: var(--warning);
+}
+.priority-low {
+    background: rgba(63, 185, 80, 0.08);
+    color: var(--success);
+}
+
 @keyframes pulse-status {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.6; }

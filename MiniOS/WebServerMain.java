@@ -22,6 +22,7 @@ public class WebServerMain {
         server.createContext("/api/createProcess", new CreateProcessHandler());
         server.createContext("/api/addThread", new AddThreadHandler());
         server.createContext("/api/runProcess", new RunProcessHandler());
+        server.createContext("/api/runScheduler", new RunSchedulerHandler());
         server.createContext("/api/getProcesses", new GetProcessesHandler());
         server.createContext("/api/getSchedulerInfo", new GetSchedulerHandler());
 
@@ -66,6 +67,7 @@ public class WebServerMain {
             String body = readBody(exchange.getRequestBody());
             // very small JSON parsing: look for "name":"..."
             String name = extractString(body, "name");
+            String pr = extractString(body, "priority");
             if (name == null || name.isBlank()) {
                 writeJson(exchange, 400, "{\"error\":\"Missing name\"}");
                 return;
@@ -73,7 +75,7 @@ public class WebServerMain {
 
             AppBackend backend = AppBackend.getInstance();
             try {
-                var p = backend.createProcess(name);
+                var p = backend.createProcess(name, pr);
                 String json = String.format("{\"id\":%d,\"name\":\"%s\"}", p.getProcessId(), p.getProcessName());
                 writeJson(exchange, 200, json);
             } catch (Exception e) {
@@ -102,6 +104,7 @@ public class WebServerMain {
             String body = readBody(exchange.getRequestBody());
             int processId = extractInt(body, "processId");
             String taskType = extractString(body, "taskType");
+            String threadPriority = extractString(body, "priority");
 
             AppBackend backend = AppBackend.getInstance();
             boolean ok = false;
@@ -109,12 +112,12 @@ public class WebServerMain {
                 if ("PrintTask".equalsIgnoreCase(taskType)) {
                     String message = extractString(body, "message");
                     int iterations = extractInt(body, "iterations");
-                    ok = backend.addPrintThread(processId, message, iterations);
+                    ok = backend.addPrintThread(processId, message, iterations, threadPriority);
                 } else if ("CalculationTask".equalsIgnoreCase(taskType)) {
                     int num1 = extractInt(body, "num1");
                     int num2 = extractInt(body, "num2");
                     String operator = extractString(body, "operator");
-                    ok = backend.addCalculationThread(processId, num1, num2, operator);
+                    ok = backend.addCalculationThread(processId, num1, num2, operator, threadPriority);
                 }
             } catch (InvalidProcessException e) {
                 writeJson(exchange, 400, String.format("{\"error\":\"%s\"}", e.getMessage()));
@@ -156,6 +159,24 @@ public class WebServerMain {
         }
     }
 
+    static class RunSchedulerHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                writeJson(exchange, 405, "{\"error\":\"Method Not Allowed\"}");
+                return;
+            }
+
+            AppBackend backend = AppBackend.getInstance();
+            // run scheduler in background thread to avoid blocking
+            new Thread(() -> {
+                backend.runScheduler();
+            }).start();
+
+            writeJson(exchange, 200, "{\"status\":\"scheduler_started\"}");
+        }
+    }
+
     static class GetProcessesHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
@@ -181,8 +202,8 @@ public class WebServerMain {
                 var p = (os.process.Process) o;
                 if (!first) sb.append(',');
                 first = false;
-                sb.append(String.format("{\"id\":%d,\"name\":\"%s\",\"status\":\"%s\",\"threads\":%d}",
-                        p.getProcessId(), escapeJson(p.getProcessName()), p.getState().name(), p.getThreadCount()));
+                sb.append(String.format("{\"id\":%d,\"name\":\"%s\",\"status\":\"%s\",\"threads\":%d,\"priority\":\"%s\"}",
+                    p.getProcessId(), escapeJson(p.getProcessName()), p.getState().name(), p.getThreadCount(), p.getPriority().name()));
             }
             sb.append(']');
             writeJson(exchange, 200, sb.toString());

@@ -141,6 +141,9 @@
         <section id="scheduler" class="tab-content">
             <div class="section-header">
                 <h2>Scheduler & Timeline</h2>
+                <div class="header-actions">
+                    <button class="btn btn-primary" id="run-scheduler-btn">Run Scheduler</button>
+                </div>
             </div>
 
             <!-- Scheduler Stats -->
@@ -191,6 +194,14 @@
                         placeholder="e.g., Background Tasks, Data Processing..."
                         required
                     >
+                </div>
+                <div class="form-group">
+                    <label for="process-priority">Priority</label>
+                    <select id="process-priority">
+                        <option value="MEDIUM">Medium (Default)</option>
+                        <option value="HIGH">High</option>
+                        <option value="LOW">Low</option>
+                    </select>
                 </div>
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" data-modal="create-process-modal">
@@ -274,6 +285,15 @@
                             >
                         </div>
                     </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="thread-priority">Thread Priority</label>
+                    <select id="thread-priority">
+                        <option value="MEDIUM">Medium (Default)</option>
+                        <option value="HIGH">High</option>
+                        <option value="LOW">Low</option>
+                    </select>
                 </div>
 
                 <div class="form-actions">
