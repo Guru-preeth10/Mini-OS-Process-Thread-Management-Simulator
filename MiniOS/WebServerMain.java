@@ -25,6 +25,7 @@ public class WebServerMain {
         server.createContext("/api/runScheduler", new RunSchedulerHandler());
         server.createContext("/api/getProcesses", new GetProcessesHandler());
         server.createContext("/api/getSchedulerInfo", new GetSchedulerHandler());
+        server.createContext("/api/getExecutionLog", new GetExecutionLogHandler());
 
         server.setExecutor(null);
         server.start();
@@ -230,6 +231,46 @@ public class WebServerMain {
             var s = backend.getScheduler();
             String json = String.format("{\"name\":\"%s\",\"scheduledCount\":%d}", escapeJson(s.getSchedulerName()), s.getScheduledProcessCount());
             writeJson(exchange, 200, json);
+        }
+    }
+
+    static class GetExecutionLogHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
+                exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+                exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type");
+                exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+                exchange.sendResponseHeaders(204, -1);
+                return;
+            }
+
+            if (!"GET".equalsIgnoreCase(exchange.getRequestMethod())) {
+                writeJson(exchange, 405, "{\"error\":\"Method Not Allowed\"}");
+                return;
+            }
+
+            AppBackend backend = AppBackend.getInstance();
+            var log = backend.getExecutionLog();
+            // build JSON
+            StringBuilder sb = new StringBuilder();
+            sb.append('[');
+            boolean first = true;
+            for (var m : log) {
+                if (!first) sb.append(','); first = false;
+                sb.append('{');
+                boolean innerFirst = true;
+                for (var e : m.entrySet()) {
+                    if (!innerFirst) sb.append(','); innerFirst = false;
+                    sb.append('"').append(escapeJson(e.getKey())).append('"').append(':');
+                    Object v = e.getValue();
+                    if (v instanceof Number) sb.append(v.toString());
+                    else sb.append('"').append(escapeJson(String.valueOf(v))).append('"');
+                }
+                sb.append('}');
+            }
+            sb.append(']');
+            writeJson(exchange, 200, sb.toString());
         }
     }
 

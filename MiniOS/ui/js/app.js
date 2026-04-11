@@ -17,6 +17,8 @@ const ENDPOINTS = {
     GET_SCHEDULER_INFO: '/getSchedulerInfo'
 };
 
+ENDPOINTS.GET_EXECUTION_LOG = '/getExecutionLog';
+
 // ============================================================
 // STATE MANAGEMENT
 // ============================================================
@@ -561,6 +563,59 @@ function simulateExecutionOutput(process) {
 function loadSchedulerData() {
     updateSchedulerStats();
     renderTimeline();
+    renderGantt();
+}
+
+async function renderGantt() {
+    const gantt = document.getElementById('gantt-chart');
+    if (!gantt) return;
+    try {
+        const resp = await fetch(`${API_BASE}${ENDPOINTS.GET_EXECUTION_LOG}`);
+        if (!resp.ok) throw new Error('no log');
+        const log = await resp.json();
+
+        // transform log entries into start/end per process
+        const events = {};
+        log.forEach(e => {
+            const id = e.processId;
+            if (!events[id]) events[id] = { id, name: e.name || ('PID ' + id), start: null, end: null };
+            if (e.start) events[id].start = e.start;
+            if (e.end) events[id].end = e.end;
+        });
+
+        const rows = Object.values(events).sort((a,b)=> (a.start||0)-(b.start||0));
+        if (rows.length === 0) {
+            gantt.innerHTML = '<div class="gantt-empty">No execution data</div>';
+            return;
+        }
+
+        const minStart = Math.min(...rows.map(r=>r.start||Date.now()));
+        const maxEnd = Math.max(...rows.map(r=>r.end|| (r.start||Date.now()) ));
+        const total = Math.max(1, maxEnd - minStart);
+
+        gantt.innerHTML = '';
+        rows.forEach((r, idx) => {
+            const row = document.createElement('div'); row.className = 'gantt-row';
+            const label = document.createElement('div'); label.className = 'gantt-label'; label.textContent = r.name;
+            row.appendChild(label);
+
+            if (r.start && r.end) {
+                const leftPct = ((r.start - minStart) / total) * 100;
+                const widthPct = ((r.end - r.start) / total) * 100;
+                const bar = document.createElement('div');
+                const priority = (state.processes.find(p=>p.id===r.id)||{}).priority || 'MEDIUM';
+                bar.className = `gantt-bar gantt-${priority.toLowerCase()}`;
+                bar.style.left = `calc(220px + ${leftPct}% )`;
+                bar.style.width = `calc(${widthPct}% - 8px)`;
+                bar.textContent = `${Math.round((r.end-r.start)/1000)}s`;
+                row.appendChild(bar);
+            }
+
+            gantt.appendChild(row);
+        });
+    } catch (e) {
+        gantt.innerHTML = '<div class="gantt-empty">No execution data</div>';
+    }
 }
 
 function updateSchedulerStats() {

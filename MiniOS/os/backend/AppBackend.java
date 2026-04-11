@@ -9,6 +9,8 @@ import os.exception.InvalidProcessException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * AppBackend - simple singleton backend to hold processes and scheduler
@@ -22,6 +24,7 @@ public class AppBackend {
     private int processIdCounter = 1;
     private int threadIdCounter = 1;
     private int taskIdCounter = 101;
+    private List<Map<String, Object>> executionLog = new ArrayList<>();
 
     private AppBackend() {
         scheduler = new SimpleScheduler("Web API Scheduler");
@@ -64,11 +67,26 @@ public class AppBackend {
     public synchronized boolean runProcess(int processId) throws InvalidProcessException {
         Process p = findProcess(processId);
         if (p == null) return false;
-        p.startProcess();
-        // run in background to avoid blocking server thread
+        // run synchronously in background thread so caller can trigger
         new Thread(() -> {
             try {
+                // record start
+                Map<String,Object> startEvt = new HashMap<>();
+                startEvt.put("processId", p.getProcessId());
+                startEvt.put("name", p.getProcessName());
+                long start = System.currentTimeMillis();
+                startEvt.put("start", start);
+                synchronized (executionLog) { executionLog.add(startEvt); }
+
+                p.startProcess();
                 p.waitForCompletion();
+
+                long end = System.currentTimeMillis();
+                Map<String,Object> endEvt = new HashMap<>();
+                endEvt.put("processId", p.getProcessId());
+                endEvt.put("end", end);
+                endEvt.put("duration", end - start);
+                synchronized (executionLog) { executionLog.add(endEvt); }
             } catch (InvalidProcessException e) {
                 System.err.println("Error while running process: " + e.getMessage());
             }
@@ -81,7 +99,39 @@ public class AppBackend {
     }
 
     public synchronized void runScheduler() {
-        scheduler.executeAllProcesses();
+        // Execute scheduled processes in priority order and record timeline
+        List<Process> list = scheduler.getScheduledProcesses();
+        for (Process p : list) {
+            try {
+                // start
+                Map<String,Object> startEvt = new HashMap<>();
+                startEvt.put("processId", p.getProcessId());
+                startEvt.put("name", p.getProcessName());
+                long start = System.currentTimeMillis();
+                startEvt.put("start", start);
+                synchronized (executionLog) { executionLog.add(startEvt); }
+
+                p.startProcess();
+                p.waitForCompletion();
+
+                long end = System.currentTimeMillis();
+                Map<String,Object> endEvt = new HashMap<>();
+                endEvt.put("processId", p.getProcessId());
+                endEvt.put("end", end);
+                endEvt.put("duration", end - start);
+                synchronized (executionLog) { executionLog.add(endEvt); }
+            } catch (InvalidProcessException e) {
+                System.err.println("Error while running process: " + e.getMessage());
+            }
+        }
+        // clear scheduled processes after execution
+        scheduler.clearScheduledProcesses();
+    }
+
+    public synchronized List<Map<String,Object>> getExecutionLog() {
+        synchronized (executionLog) {
+            return new ArrayList<>(executionLog);
+        }
     }
 
     private Process.Priority parsePriority(String s) {
